@@ -151,6 +151,10 @@ end
 local function v3(v) return { v.X, v.Y, v.Z } end
 local function c3(c) return { c.R, c.G, c.B } end
 local function cf(c) return { c:GetComponents() } end
+local function effectiveTransparency(part)
+	local localTransparency = math.clamp(part.LocalTransparencyModifier, 0, 1)
+	return 1 - (1 - part.Transparency) * (1 - localTransparency)
+end
 
 local function readProp(inst, ...)
 	for _, name in { ... } do
@@ -166,7 +170,8 @@ local function readProp(inst, ...)
 end
 
 local function serializePart(part, pivotInv, assets)
-	if part.Transparency >= 0.999 then
+	local transparency = effectiveTransparency(part)
+	if transparency >= 0.999 then
 		-- still export decals? invisible part -> skip entirely
 		return nil
 	end
@@ -176,7 +181,7 @@ local function serializePart(part, pivotInv, assets)
 		size = v3(part.Size),
 		cf = cf(pivotInv * part.CFrame),
 		color = c3(part.Color),
-		transparency = part.Transparency,
+		transparency = transparency,
 		reflectance = part.Reflectance,
 		material = part.Material.Name,
 	}

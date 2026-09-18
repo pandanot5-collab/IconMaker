@@ -289,6 +289,7 @@ export async function buildModel(payload, onWarn) {
   let unions = 0;
 
   await Promise.all(payload.parts.map(async (part) => {
+    if ((part.transparency ?? 0) >= 0.999) return;
     if (part.shape === 'Union') { unions++; return; }
     const holder = new THREE.Group();
     const c = part.cf;
