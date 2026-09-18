@@ -191,7 +191,8 @@ export function useOverlay(mat, baseColor) {
 
 async function makeMaterial(part, textureRef, assetTex) {
   const [rough, metal] = MATERIALS[part.material] || [0.6, 0];
-  const opacity = 1 - part.transparency;
+  const hasTexture = Boolean(textureRef || part.sa?.colorMap);
+  const opacity = part.invisible && hasTexture ? 1 : 1 - part.transparency;
   const mat = new THREE.MeshStandardMaterial({
     color: srgbColor(part.color),
     roughness: Math.max(0.04, rough - part.reflectance * 0.5),
@@ -229,7 +230,7 @@ async function makeMaterial(part, textureRef, assetTex) {
       mat.map = tex;
       if (part.mesh && part.mesh.vertexColor) mat.color = new THREE.Color(...part.mesh.vertexColor);
       else mat.color = new THREE.Color(1, 1, 1);
-      useOverlay(mat, srgbColor(part.color));
+      useOverlay(mat, part.invisible ? new THREE.Color(1, 1, 1) : srgbColor(part.color));
     }
   }
   return mat;
@@ -289,7 +290,6 @@ export async function buildModel(payload, onWarn) {
   let unions = 0;
 
   await Promise.all(payload.parts.map(async (part) => {
-    if ((part.transparency ?? 0) >= 0.999) return;
     if (part.shape === 'Union') { unions++; return; }
     const holder = new THREE.Group();
     const c = part.cf;
@@ -323,10 +323,13 @@ export async function buildModel(payload, onWarn) {
       ({ geo, scale } = primitiveFor(part.shape, part.size));
     }
 
-    const mesh = new THREE.Mesh(geo, await makeMaterial(part, textureRef, assetTex));
-    mesh.scale.set(...scale);
-    mesh.position.set(...offset);
-    holder.add(mesh);
+    const hasTexture = Boolean(textureRef || part.sa?.colorMap);
+    if (!part.invisible || hasTexture) {
+      const mesh = new THREE.Mesh(geo, await makeMaterial(part, textureRef, assetTex));
+      mesh.scale.set(...scale);
+      mesh.position.set(...offset);
+      holder.add(mesh);
+    }
 
     for (const d of part.decals || []) {
       const tex = await assetTex(d.texture, true);

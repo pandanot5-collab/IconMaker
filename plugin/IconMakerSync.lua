@@ -171,10 +171,6 @@ end
 
 local function serializePart(part, pivotInv, assets)
 	local transparency = effectiveTransparency(part)
-	if transparency >= 0.999 then
-		-- still export decals? invisible part -> skip entirely
-		return nil
-	end
 	local info = {
 		class = part.ClassName,
 		name = part.Name,
@@ -182,6 +178,7 @@ local function serializePart(part, pivotInv, assets)
 		cf = cf(pivotInv * part.CFrame),
 		color = c3(part.Color),
 		transparency = transparency,
+		invisible = transparency >= 0.999,
 		reflectance = part.Reflectance,
 		material = part.Material.Name,
 	}
