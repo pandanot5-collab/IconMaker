@@ -191,8 +191,7 @@ export function useOverlay(mat, baseColor) {
 
 async function makeMaterial(part, textureRef, assetTex) {
   const [rough, metal] = MATERIALS[part.material] || [0.6, 0];
-  const hasTexture = Boolean(textureRef || part.sa?.colorMap);
-  const opacity = part.invisible && hasTexture ? 1 : 1 - part.transparency;
+  const opacity = 1 - part.transparency;
   const mat = new THREE.MeshStandardMaterial({
     color: srgbColor(part.color),
     roughness: Math.max(0.04, rough - part.reflectance * 0.5),
@@ -215,6 +214,12 @@ async function makeMaterial(part, textureRef, assetTex) {
     mat.color = srgbColor(sa.color || [1, 1, 1]);
     if (color) {
       mat.map = color;
+      if (part.invisible) {
+        mat.color.setRGB(1, 1, 1);
+        mat.opacity = 1;
+        mat.transparent = true;
+        mat.depthWrite = true;
+      }
       if (sa.alphaMode === 'Overlay') useOverlay(mat, srgbColor(part.color));
       else if (sa.alphaMode === 'Transparency') { mat.transparent = true; mat.alphaTest = 0.02; mat.depthWrite = true; }
     }
@@ -228,6 +233,11 @@ async function makeMaterial(part, textureRef, assetTex) {
     const tex = await assetTex(textureRef, true);
     if (tex) {
       mat.map = tex;
+      if (part.invisible) {
+        mat.opacity = 1;
+        mat.transparent = true;
+        mat.depthWrite = true;
+      }
       if (part.mesh && part.mesh.vertexColor) mat.color = new THREE.Color(...part.mesh.vertexColor);
       else mat.color = new THREE.Color(1, 1, 1);
       useOverlay(mat, part.invisible ? new THREE.Color(1, 1, 1) : srgbColor(part.color));
@@ -323,9 +333,9 @@ export async function buildModel(payload, onWarn) {
       ({ geo, scale } = primitiveFor(part.shape, part.size));
     }
 
-    const hasTexture = Boolean(textureRef || part.sa?.colorMap);
-    if (!part.invisible || hasTexture) {
-      const mesh = new THREE.Mesh(geo, await makeMaterial(part, textureRef, assetTex));
+    const material = await makeMaterial(part, textureRef, assetTex);
+    if (!part.invisible || material.map) {
+      const mesh = new THREE.Mesh(geo, material);
       mesh.scale.set(...scale);
       mesh.position.set(...offset);
       holder.add(mesh);
