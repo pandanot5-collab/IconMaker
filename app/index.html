@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Icon Maker</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    { "imports": {
+        "three": "./node_modules/three/build/three.module.js",
+        "three/addons/": "./node_modules/three/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <main id="viewport">
+    <canvas id="canvas"></canvas>
+    <div id="frame"><span id="frameLabel">512 × 512</span></div>
+    <div id="empty">
+      <h2>Select a model in Roblox Studio</h2>
+      <p>With the <b>Icon Maker</b> plugin's <b>Live Sync</b> on, the selection shows up here.</p>
+    </div>
+    <div id="hint">Drag: rotate · Shift+drag: roll · Right-drag: move · Wheel: zoom</div>
+    <div id="status"></div>
+  </main>
+
+  <aside id="panel">
+    <section>
+      <h3>Model <span id="modelName" class="muted"></span></h3>
+      <div id="warnings"></div>
+    </section>
+
+    <section>
+      <h3>Camera</h3>
+      <label class="row">FOV <input type="range" id="fov" min="1" max="120" step="1"><output></output></label>
+      <label class="row">Zoom <input type="range" id="zoom" min="0.2" max="4" step="0.01"><output></output></label>
+      <div class="row triple">
+        <label>X° <input type="number" id="rotX" step="5"></label>
+        <label>Y° <input type="number" id="rotY" step="5"></label>
+        <label>Z° <input type="number" id="rotZ" step="5"></label>
+      </div>
+      <label class="check"><input type="checkbox" id="normalize"> Auto-fit every model to the frame</label>
+      <div class="buttons">
+        <button id="resetView">Reset view</button>
+        <button id="resetPan">Center</button>
+      </div>
+    </section>
+
+    <section id="vfxSection" hidden>
+      <h3>VFX <span id="vfxCount" class="muted"></span></h3>
+      <label class="check"><input type="checkbox" id="showVfx"> Show particles, beams &amp; lights</label>
+      <div class="buttons">
+        <button id="vfxPlay">Pause</button>
+        <button id="vfxRestart">Restart</button>
+      </div>
+      <label class="row">Time <input type="range" id="vfxTime" min="0" max="3" step="0.01"><output id="vfxTimeOut"></output></label>
+      <label class="row">Loop (s) <input type="number" id="vfxLoop" min="0.2" max="30" step="0.5"></label>
+      <p class="muted tiny">Pause or drag Time to freeze the exact moment — the export uses the frame you see.</p>
+    </section>
+
+    <section>
+      <h3>Style <button id="cartoonPreset" class="small">Cartoon preset</button></h3>
+      <label class="row">Shading
+        <select id="shading"><option value="realistic">Realistic</option><option value="toon">Toon (flat cartoon)</option></select>
+      </label>
+      <div id="toonOptions">
+        <label class="row">Bands <input type="range" id="toonBands" min="2" max="6" step="1"><output></output></label>
+        <label class="row">Shadow <input type="range" id="toonShadow" min="0" max="1" step="0.01"><output></output></label>
+        <label class="check"><input type="checkbox" id="flatFaces"> Flat faces (low-poly look)</label>
+      </div>
+    </section>
+
+    <section>
+      <h3>Adjustments</h3>
+      <label class="row">Brightness <input type="range" id="brightness" min="-0.5" max="0.5" step="0.01"><output></output></label>
+      <label class="row">Contrast <input type="range" id="contrast" min="0" max="2" step="0.01"><output></output></label>
+      <label class="row">Saturation <input type="range" id="saturation" min="0" max="2" step="0.01"><output></output></label>
+      <label class="row">Light <input type="range" id="light" min="0" max="3" step="0.01"><output></output></label>
+      <button id="resetAdjust" class="small">Reset adjustments</button>
+    </section>
+
+    <section>
+      <h3>Outlines <button id="addOutline" class="small">+ Add</button></h3>
+      <p class="muted tiny">Stacked from the model outward. Thickness is in pixels at 512 px.</p>
+      <div id="outlines"></div>
+    </section>
+
+    <section>
+      <h3>Export</h3>
+      <label class="row">Size
+        <select id="exportSize">
+          <option>128</option><option>256</option><option>420</option><option>512</option><option>1024</option><option>2048</option>
+        </select>
+      </label>
+      <label class="row">Background
+        <select id="bgMode"><option value="transparent">Transparent</option><option value="color">Colour</option></select>
+        <input type="color" id="bgColor">
+      </label>
+      <div class="buttons">
+        <button id="savePng" class="primary">Save PNG…</button>
+        <button id="copyPng">Copy</button>
+      </div>
+    </section>
+
+    <details>
+      <summary>Asset download settings</summary>
+      <p class="muted tiny">The plugin sends meshes/textures it can read. Assets it can't read (e.g. from other creators) are downloaded by the app, which Roblox requires you to be signed in for. Provide <b>one</b> of these:</p>
+      <label>Open Cloud API key (legacy-assets read)<input type="password" id="apiKey" placeholder="optional"></label>
+      <label>.ROBLOSECURITY cookie<input type="password" id="cookie" placeholder="optional"></label>
+      <p class="muted tiny">Stored only on this PC. Never share your cookie with anyone.</p>
+      <div class="buttons">
+        <button id="saveSettings">Save</button>
+        <button id="clearCache">Clear asset cache</button>
+      </div>
+    </details>
+  </aside>
+
+  <script type="module" src="renderer/app.js"></script>
+</body>
+</html>

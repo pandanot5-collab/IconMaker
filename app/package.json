@@ -1,0 +1,23 @@
+{
+  "name": "icon-maker",
+  "version": "1.0.0",
+  "description": "Roblox Studio icon maker",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.iconmaker.app",
+    "productName": "Icon Maker",
+    "files": ["**/*", "!dist/**"],
+    "win": { "target": "portable" }
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}
